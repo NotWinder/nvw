@@ -94,6 +94,9 @@ in rec {
     pkgs.revive
     pkgs.stylua
     python3Packages.black
+
+    #Extra
+    pkgs.git
   ];
 
   mkExtraConfig = ''
