@@ -97,6 +97,7 @@ in rec {
 
     #Extra
     pkgs.git
+    pkgs.zig
   ];
 
   mkExtraConfig = ''
