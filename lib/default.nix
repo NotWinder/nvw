@@ -74,11 +74,10 @@ in rec {
   in [
     # language servers
     nodePackages.bash-language-server
-    nodePackages.diagnostic-languageserver
     nodePackages.typescript-language-server
     nodePackages.yaml-language-server
     pkgs.gopls
-    pkgs.jsonnet-language-server
+    pkgs.java-language-server
     pkgs.lua-language-server
     pkgs.nixd
     pkgs.pyright
