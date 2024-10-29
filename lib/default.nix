@@ -28,6 +28,7 @@ in rec {
   in [
     # lsp-config
     vimPlugins.zig-vim
+    vimPlugins.nvim-jdtls
 
     #LSP-config
     vimPlugins.mason-nvim
@@ -77,7 +78,7 @@ in rec {
     nodePackages.typescript-language-server
     nodePackages.yaml-language-server
     pkgs.gopls
-    pkgs.java-language-server
+    pkgs.jdt-language-server
     pkgs.lua-language-server
     pkgs.nixd
     pkgs.pyright

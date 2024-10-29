@@ -61,7 +61,7 @@ require("mason-lspconfig").setup_handlers({
         },
     }),
     lspconfig.pyright.setup({ capabilities = capabilities }),
-    lspconfig.java_language_server.setup({ capabilities = capabilities }),
+    lspconfig.jdtls.setup({ capabilities = capabilities }),
     lspconfig.rust_analyzer.setup({ capabilities = capabilities }),
     lspconfig.ts_ls.setup({ capabilities = capabilities }),
     lspconfig.yamlls.setup({ capabilities = capabilities }),

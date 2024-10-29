@@ -28,7 +28,7 @@
         inherit (pkgs) alejandra just mkShell;
       in {
         apps = {
-          nvim = {
+          default = {
             program = "${config.packages.neovim}/bin/nvim";
           };
         };
