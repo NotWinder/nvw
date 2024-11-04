@@ -31,9 +31,9 @@ in rec {
     vimPlugins.nvim-jdtls
 
     #LSP-config
+    vimPlugins.nvim-lspconfig
     vimPlugins.mason-nvim
     vimPlugins.mason-lspconfig-nvim
-    vimPlugins.nvim-lspconfig
 
     # telescope
     vimPlugins.plenary-nvim
@@ -74,20 +74,20 @@ in rec {
     };
   in [
     # language servers
+    inputs.nixd.packages.${system}.default
+    inputs.zls.packages.${system}.default
     nodePackages.bash-language-server
     nodePackages.typescript-language-server
     nodePackages.yaml-language-server
     pkgs.gopls
     pkgs.jdt-language-server
     pkgs.lua-language-server
-    pkgs.nixd
     pkgs.pyright
     pkgs.rust-analyzer
-    pkgs.zls
 
     # formatters
+    inputs.alejandra.packages.${system}.default
     nodePackages.prettier
-    pkgs.alejandra
     pkgs.gofumpt
     pkgs.golines
     pkgs.isort
