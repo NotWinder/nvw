@@ -62,12 +62,16 @@ in rec {
     vimPlugins.friendly-snippets
     vimPlugins.cmp-nvim-lsp
 
+    #DAP
+    vimPlugins.nvim-dap
+    vimPlugins.nvim-dap-ui
+
     # configuration
     winder-nvim
   ];
 
   mkExtraPackages = {system}: let
-    inherit (pkgs) nodePackages python3Packages;
+    inherit (pkgs) nodePackages python3Packages vscode-extensions;
     pkgs = import inputs.nixpkgs {
       inherit system;
       config.allowUnfree = true;
@@ -98,6 +102,10 @@ in rec {
     #Extra
     pkgs.git
     pkgs.gcc
+
+    # FUCK JAVA
+    vscode-extensions.vscjava.vscode-java-debug
+    vscode-extensions.vscjava.vscode-java-test
   ];
 
   mkExtraConfig = ''
