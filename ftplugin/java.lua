@@ -26,7 +26,7 @@ local bundles = {
 
 local config = {
 	cmd = {
-		"/nix/store/ackzbbfddahphl76rklgigkbkax77s21-openjdk-22.0.2-ga/bin/java",
+		"/run/current-system/sw/bin/java",
 		"-Declipse.application=org.eclipse.jdt.ls.core.id1",
 		"-Dosgi.bundles.defaultStartLevel=4",
 		"-Declipse.product=org.eclipse.jdt.ls.core.product",
