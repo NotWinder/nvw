@@ -20,31 +20,96 @@
         "aarch64-darwin"
       ];
 
-      perSystem = {
-        pkgs,
-        system,
-        ...
-      }: let
+      perSystem = {system, ...}: let
         nixvimLib = nixvim.lib.${system};
         nixvim' = nixvim.legacyPackages.${system};
         nixvimModule = {
           inherit pkgs;
-          module = import ./config; # import the module directly
-          # You can use `extraSpecialArgs` to pass additional arguments to your module files
-          extraSpecialArgs = {
-            # inherit (inputs) foo;
+          module = {
+            imports = [
+              ./config
+              ./config/plugins
+              ./config/plugins/lsp/go
+              ./config/plugins/lsp/java
+              ./config/plugins/lsp/js
+              ./config/plugins/lsp/python
+            ];
           };
         };
+        goNixvimModule = {
+          inherit pkgs;
+          module = {
+            imports = [
+              ./config
+              ./config/plugins
+              ./config/plugins/lsp/go
+            ];
+          };
+        };
+        pythonNixvimModule = {
+          inherit pkgs;
+          module = {
+            imports = [
+              ./config
+              ./config/plugins
+              ./config/plugins/lsp/python
+            ];
+          };
+        };
+        javaNixvimModule = {
+          inherit pkgs;
+          module = {
+            imports = [
+              ./config
+              ./config/plugins
+              ./config/plugins/lsp/java
+            ];
+          };
+        };
+        javascriptNixvimModule = {
+          inherit pkgs;
+          module = {
+            imports = [
+              ./config
+              ./config/plugins
+              ./config/plugins/lsp/js
+            ];
+          };
+        };
+        pkgs = import inputs.nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
         nvim = nixvim'.makeNixvimWithModule nixvimModule;
+        goNvim = nixvim'.makeNixvimWithModule goNixvimModule;
+        pythonNvim = nixvim'.makeNixvimWithModule pythonNixvimModule;
+        javascriptNvim = nixvim'.makeNixvimWithModule javascriptNixvimModule;
+        javaNvim = nixvim'.makeNixvimWithModule javaNixvimModule;
       in {
         checks = {
           # Run `nix flake check .` to verify that your config is not broken
           default = nixvimLib.check.mkTestDerivationFromNixvimModule nixvimModule;
+          # Run `nix flake check .#go` to verify that your config is not broken
+          go = nixvimLib.check.mkTestDerivationFromNixvimModule goNixvimModule;
+          # Run `nix flake check .#js` to verify that your config is not broken
+          js = nixvimLib.check.mkTestDerivationFromNixvimModule javascriptNixvimModule;
+          # Run `nix flake check .python` to verify that your config is not broken
+          python = nixvimLib.check.mkTestDerivationFromNixvimModule pythonNixvimModule;
+          # Run `nix flake check .#java` to verify that your config is not broken
+          java = nixvimLib.check.mkTestDerivationFromNixvimModule javaNixvimModule;
         };
 
         packages = {
-          # Lets you run `nix run .` to start nixvim
+          # Lets you run `nix run .` to start nixvim with all the configs avalable
           default = nvim;
+          # Lets you run `nix run .#go` to start nixvim with Go configuration
+          go = goNvim;
+          # Lets you run `nix run .#python` to start nixvim with Python configuration
+          python = pythonNvim;
+          # Lets you run `nix run .#js` to start nixvim with JS/TS configuration
+          js = javascriptNvim;
+          # Lets you run `nix run .#java` to start nixvim with JS/TS configuration
+          java = javaNvim;
         };
       };
     };

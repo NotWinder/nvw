@@ -4,20 +4,11 @@
       enable = true;
       sources.formatting = {
         alejandra.enable = true;
-        black.enable = true;
-        gofumpt.enable = true;
-        golines.enable = true;
-        isort.enable = true;
-        prettier = {
-          enable = true;
-          disableTsServerFormatter = true;
-        };
         sqlformat.enable = true;
         stylua.enable = true;
         yamlfmt.enable = true;
       };
       sources.diagnostics = {
-        revive.enable = true;
         yamllint.enable = true;
       };
     };

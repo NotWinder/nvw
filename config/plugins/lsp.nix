@@ -57,20 +57,9 @@
       servers = {
         #nil_ls.enable = true;
         bashls.enable = true;
-        gopls.enable = true;
-        jdtls.enable = true;
-        jsonls.enable = true;
         lua_ls.enable = true;
         nixd.enable = true;
-        pyright.enable = true;
-        rust_analyzer = {
-          enable = true;
-          installCargo = true;
-          installRustc = true;
-        };
-        ts_ls.enable = true;
         yamlls.enable = true;
-        zls.enable = true;
       };
     };
   };
