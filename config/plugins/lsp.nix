@@ -58,7 +58,14 @@
         #nil_ls.enable = true;
         bashls.enable = true;
         lua_ls.enable = true;
-        nixd.enable = true;
+        nixd = {
+          enable = true;
+          extraOptions = {
+            nixpkgs = {
+              expr = "import <nixpkgs> { }";
+            };
+          };
+        };
         yamlls.enable = true;
       };
     };

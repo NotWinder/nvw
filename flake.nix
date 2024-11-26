@@ -33,6 +33,7 @@
               ./config/plugins/lsp/java
               ./config/plugins/lsp/js
               ./config/plugins/lsp/python
+              ./config/plugins/lsp/zig
             ];
           };
         };
@@ -76,6 +77,16 @@
             ];
           };
         };
+        zigNixvimModule = {
+          inherit pkgs;
+          module = {
+            imports = [
+              ./config
+              ./config/plugins
+              ./config/plugins/lsp/zig
+            ];
+          };
+        };
         pkgs = import inputs.nixpkgs {
           inherit system;
           config.allowUnfree = true;
@@ -85,6 +96,7 @@
         pythonNvim = nixvim'.makeNixvimWithModule pythonNixvimModule;
         javascriptNvim = nixvim'.makeNixvimWithModule javascriptNixvimModule;
         javaNvim = nixvim'.makeNixvimWithModule javaNixvimModule;
+        zigNvim = nixvim'.makeNixvimWithModule zigNixvimModule;
       in {
         checks = {
           # Run `nix flake check .` to verify that your config is not broken
@@ -97,6 +109,8 @@
           python = nixvimLib.check.mkTestDerivationFromNixvimModule pythonNixvimModule;
           # Run `nix flake check .#java` to verify that your config is not broken
           java = nixvimLib.check.mkTestDerivationFromNixvimModule javaNixvimModule;
+          # Run `nix flake check .#zig` to verify that your config is not broken
+          zig = nixvimLib.check.mkTestDerivationFromNixvimModule zigNixvimModule;
         };
 
         packages = {
@@ -110,6 +124,8 @@
           js = javascriptNvim;
           # Lets you run `nix run .#java` to start nixvim with JS/TS configuration
           java = javaNvim;
+          # Lets you run `nix run .#zig` to start nixvim with JS/TS configuration
+          zig = zigNvim;
         };
       };
     };
