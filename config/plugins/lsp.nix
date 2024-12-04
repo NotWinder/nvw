@@ -55,17 +55,9 @@
         end
       '';
       servers = {
-        #nil_ls.enable = true;
         bashls.enable = true;
         lua_ls.enable = true;
-        nixd = {
-          enable = true;
-          extraOptions = {
-            nixpkgs = {
-              expr = "import <nixpkgs> { }";
-            };
-          };
-        };
+        nil_ls.enable = true;
         yamlls.enable = true;
       };
     };

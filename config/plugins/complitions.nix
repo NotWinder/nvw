@@ -4,45 +4,9 @@ in {
   plugins = {
     cmp = {
       enable = true;
+      autoEnableSources = true;
       settings = {
-        autoEnableSources = true;
-        performance = {
-          debounce = 150;
-        };
-        sources = [
-          {name = "path";}
-          {
-            name = "nvim_lsp";
-            keywordLength = 1;
-          }
-          {
-            name = "buffer";
-            keywordLength = 3;
-          }
-          {name = "supermaven";}
-        ];
-
-        snippet.expand = "function(args) require('luasnip').lsp_expand(args.body) end";
-        formatting = {
-          fields = [
-            "menu"
-            "abbr"
-            "kind"
-          ];
-          format = ''
-            function(entry, item)
-              local menu_icon = {
-                nvim_lsp = '[LSP]',
-                luasnip = '[SNIP]',
-                buffer = '[BUF]',
-                path = '[PATH]',
-              }
-
-              item.menu = menu_icon[entry.source.name]
-              return item
-            end
-          '';
-        };
+        experimental = {ghost_text = true;};
 
         mapping = {
           "<Up>" = "cmp.mapping.select_prev_item(${selectOpts})";
@@ -114,6 +78,41 @@ in {
             )
           '';
         };
+
+        formatting = {fields = ["kind" "abbr" "menu"];};
+
+        performance = {
+          debounce = 60;
+          fetching_timeout = 200;
+          max_view_entries = 30;
+        };
+
+        snippet = {
+          expand = ''
+            function(args)
+              require('luasnip').lsp_expand(args.body)
+            end
+          '';
+        };
+
+        sources = [
+          {name = "nvim_lsp";}
+          {name = "luasnip";}
+          {
+            name = "buffer"; # text within current buffer
+            option.get_bufnrs.__raw = "vim.api.nvim_list_bufs";
+            keywordLength = 3;
+          }
+          {
+            name = "path"; # file system paths
+            keywordLength = 3;
+          }
+          {
+            name = "luasnip"; # snippets
+            keywordLength = 3;
+          }
+        ];
+
         window = {
           completion = {
             border = "rounded";
@@ -133,14 +132,14 @@ in {
         };
       };
     };
-    cmp-nvim-lsp.enable = true;
     cmp-buffer.enable = true;
+    cmp-cmdline.enable = true; # autocomplete for cmdline
+    cmp-nvim-lsp.enable = true;
     cmp-path.enable = true;
     cmp-treesitter.enable = true;
-    dap.enable = true;
-
-    trouble = {
-      enable = true;
-    };
+    cmp_luasnip.enable = true; # snippets
+    luasnip.enable = true;
+    friendly-snippets.enable = true;
+    trouble.enable = true;
   };
 }
