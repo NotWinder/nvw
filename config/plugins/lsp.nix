@@ -57,7 +57,14 @@
       servers = {
         bashls.enable = true;
         lua_ls.enable = true;
-        nil_ls.enable = true;
+        nixd = {
+          enable = true;
+          settings = {
+            formatting = {
+              command = ["alejandra"];
+            };
+          };
+        };
         yamlls.enable = true;
       };
     };

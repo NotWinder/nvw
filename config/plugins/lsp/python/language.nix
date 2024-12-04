@@ -15,7 +15,6 @@
         pycodestyle.enabled = true;
         pydocstyle.enabled = true;
         pyflakes.enabled = true;
-        pylint.enabled = true;
         rope.enabled = true;
         yapf.enabled = true;
       };
