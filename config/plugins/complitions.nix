@@ -79,7 +79,9 @@ in {
           '';
         };
 
-        formatting = {fields = ["kind" "abbr" "menu"];};
+        formatting = {
+          fields = ["kind" "abbr" "menu"];
+        };
 
         performance = {
           debounce = 60;
@@ -98,6 +100,7 @@ in {
         sources = [
           {name = "nvim_lsp";}
           {name = "luasnip";}
+          {name = "codeium";}
           {
             name = "buffer"; # text within current buffer
             option.get_bufnrs.__raw = "vim.api.nvim_list_bufs";
@@ -141,5 +144,6 @@ in {
     luasnip.enable = true;
     friendly-snippets.enable = true;
     trouble.enable = true;
+    #lspkind.enable = true;
   };
 }
