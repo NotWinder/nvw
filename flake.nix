@@ -77,6 +77,7 @@
           telescope = with pkgs.vimPlugins; [telescope-fzf-native-nvim telescope-nvim telescope-ui-select-nvim];
           theme = with pkgs.vimPlugins; [fidget-nvim lualine-lsp-progress lualine-nvim which-key-nvim];
           treesitter = with pkgs.vimPlugins; [nvim-treesitter-textobjects nvim-treesitter.withAllGrammars];
+          markdown = with pkgs.vimPlugins; [markdown-preview-nvim];
         };
       };
     };
