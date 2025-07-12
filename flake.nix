@@ -48,6 +48,7 @@
           bash = with pkgs; [bash-language-server];
           python = with pkgs; [black isort pyright];
           rust = with pkgs; [rust-analyzer];
+          qml = with pkgs; [kdePackages.qtdeclarative];
           javascript = with pkgs; [typescript-language-server nodePackages.prettier];
           yaml = with pkgs; [yaml-language-server];
           zig = with pkgs; [zls];

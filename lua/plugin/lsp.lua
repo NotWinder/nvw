@@ -76,6 +76,14 @@ require("lze").load({
 		},
 	},
 	{
+		"qmlls",
+		enabled = nixCats("lsps.qml") or false,
+		lsp = {
+			filetypes = { "qml" },
+			cmd = { "qmlls", "-E" },
+		},
+	},
+	{
 		"gopls",
 		enabled = nixCats("lsps.go") or false,
 		lsp = {
