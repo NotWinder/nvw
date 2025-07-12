@@ -124,7 +124,7 @@ require("lze").load({
 		"ts_ls",
 		enabled = nixCats("lsps.javascript") or false,
 		lsp = {
-			filetypes = { "js" },
+			filetypes = { "js", "json", "ts" },
 		},
 	},
 	{

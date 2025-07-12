@@ -12,6 +12,7 @@ return {
 				formatters_by_ft = {
 					go = { "gofmt", "golint" },
 					javascript = { "prettier" },
+					json = { "prettier" },
 					lua = { "stylua" },
 					nix = { "alejandra" },
 					python = { "isort", "black" },
