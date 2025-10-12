@@ -46,7 +46,7 @@
           lua = with pkgs; [lua-language-server stylua];
           nix = with pkgs; [alejandra nix-doc nixd];
           bash = with pkgs; [bash-language-server];
-          python = with pkgs; [black isort pyright];
+          python = with pkgs; [black isort basedpyright python313Packages.django-stubs];
           rust = with pkgs; [rust-analyzer];
           qml = with pkgs; [kdePackages.qtdeclarative];
           javascript = with pkgs; [typescript-language-server nodePackages.prettier];
