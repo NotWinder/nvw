@@ -160,7 +160,6 @@ require("lze").load({
 				config.settings.python.pythonPath = get_python_path()
 			end,
 			on_attach = function(client, bufnr)
-				-- Call the global on_attach
 				require("plugin.on_attach")(client, bufnr)
 			end,
 			handlers = {
@@ -173,13 +172,6 @@ require("lze").load({
 						autoSearchPaths = true,
 						useLibraryCodeForTypes = true,
 						diagnosticMode = "workspace",
-						diagnosticSeverityOverrides = {
-							reportGeneralTypeIssues = false,
-							reportOptionalMemberAccess = false,
-							reportAttributeAccessIssue = false,
-							reportUnknownMemberType = false,
-							reportMissingTypeStubs = false,
-						},
 					},
 				},
 				python = {
