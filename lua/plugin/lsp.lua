@@ -172,10 +172,25 @@ require("lze").load({
 						autoSearchPaths = true,
 						useLibraryCodeForTypes = true,
 						diagnosticMode = "workspace",
+						diagnosticSeverityOverrides = {
+							reportGeneralTypeIssues = "none",
+							reportOptionalMemberAccess = "none",
+							reportAttributeAccessIssue = "none",
+						},
 					},
 				},
 				python = {
-					pythonPath = get_python_path(),
+					analysis = {
+						typeCheckingMode = "basic",
+						autoSearchPaths = true,
+						useLibraryCodeForTypes = true,
+						diagnosticMode = "workspace",
+						diagnosticSeverityOverrides = {
+							reportGeneralTypeIssues = "none",
+							reportOptionalMemberAccess = "none",
+							reportAttributeAccessIssue = "none",
+						},
+					},
 				},
 			},
 		},
