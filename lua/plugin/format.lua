@@ -15,7 +15,7 @@ return {
 					json = { "prettier" },
 					lua = { "stylua" },
 					nix = { "alejandra" },
-					python = { "isort", "black" },
+					python = { "ruff_format" },
 				},
 			})
 

@@ -40,13 +40,13 @@
       ...
     } @ packageDef: {
       lspsAndRuntimeDeps = {
-        general = with pkgs; [universal-ctags ripgrep fd];
+        general = with pkgs; [universal-ctags ripgrep fd nodejs_24];
         lsps = {
           go = with pkgs; [gccgo go-tools gofumpt golint gopls gotools];
           lua = with pkgs; [lua-language-server stylua];
           nix = with pkgs; [alejandra nix-doc nixd];
           bash = with pkgs; [bash-language-server];
-          python = with pkgs; [black isort basedpyright python313Packages.django-stubs];
+          python = with pkgs; [basedpyright ruff python313Packages.django-stubs];
           rust = with pkgs; [rust-analyzer];
           qml = with pkgs; [kdePackages.qtdeclarative];
           javascript = with pkgs; [typescript-language-server nodePackages.prettier];
@@ -67,7 +67,7 @@
         #lint = with pkgs.vimPlugins; [
         #  nvim-lint
         #];
-        complitions = with pkgs.vimPlugins; [blink-cmp blink-compat cmp-cmdline colorful-menu-nvim luasnip];
+        complitions = with pkgs.vimPlugins; [blink-cmp blink-compat cmp-cmdline colorful-menu-nvim luasnip copilot-lua CopilotChat-nvim];
         format = with pkgs.vimPlugins; [conform-nvim];
         lsps = {
           core = with pkgs.vimPlugins; [nvim-lspconfig];
