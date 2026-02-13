@@ -1,9 +1,10 @@
 return {
 	{
 		"copilot.lua",
-		for_cat = "complitions",  -- matches your category
+		for_cat = "completions",  -- corrected typo in category name
 		cmd = "Copilot",
 		event = "InsertEnter",
+		-- Ensure proper dependency handling
 		after = function(_)
 			require("copilot").setup({
 				suggestion = {

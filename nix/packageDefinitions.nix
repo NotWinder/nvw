@@ -11,7 +11,7 @@
       general = true;
       lsps = true;
       format = true;
-      complitions = true;
+      completions = true;
       theme = true;
       avante = true;
     };

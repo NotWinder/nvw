@@ -31,7 +31,7 @@
   };
 
   optionalPlugins = {
-    complitions = with pkgs.vimPlugins; [blink-cmp blink-compat cmp-cmdline colorful-menu-nvim luasnip copilot-lua];
+    completions = with pkgs.vimPlugins; [blink-cmp blink-compat cmp-cmdline colorful-menu-nvim luasnip copilot-lua];
     format = with pkgs.vimPlugins; [conform-nvim];
     lsps = {
       core = with pkgs.vimPlugins; [nvim-lspconfig];

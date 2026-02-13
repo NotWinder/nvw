@@ -16,7 +16,7 @@ vim.opt.undodir = os.getenv("HOME") .. "/.cache/nvim/undodir"
 vim.opt.undofile = true
 
 vim.opt.scrolloff = 8
-vim.opt.hlsearch = false
+vim.opt.hlsearch = true
 vim.opt.incsearch = true
 
 vim.opt.termguicolors = true
@@ -27,7 +27,8 @@ vim.opt.isfname:append("@-@")
 vim.opt.updatetime = 50
 vim.opt.colorcolumn = "80"
 
-vim.g.mapleader = " "
+-- vim.g.mapleader is already set in remap.lua, so it's redundant here.
+-- Remove it to avoid duplication.
 
 vim.g.netrw_browse_split = 0
 vim.g.netrw_banner = 0

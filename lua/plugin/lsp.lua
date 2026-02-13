@@ -3,16 +3,24 @@
 -- for when you don't provide a filetype to trigger on yourself.
 -- nixCats gives us the paths, which is faster than searching the rtp!
 local old_ft_fallback = require("lze").h.lsp.get_ft_fallback()
+-- Set up filetype fallback for LSP configurations
+-- This logic determines the appropriate filetypes for an LSP plugin if not explicitly provided
 require("lze").h.lsp.set_ft_fallback(function(name)
+	-- Attempt to locate the LSP configuration in the Nix store
 	local lspcfg = nixCats.pawsible({ "allPlugins", "opt", "nvim-lspconfig" })
 		or nixCats.pawsible({ "allPlugins", "start", "nvim-lspconfig" })
+
 	if lspcfg then
+		-- Try to load the LSP configuration file for the given name
 		local ok, cfg = pcall(dofile, lspcfg .. "/lsp/" .. name .. ".lua")
 		if not ok then
+			-- Fallback to an alternative path if the first attempt fails
 			ok, cfg = pcall(dofile, lspcfg .. "/lua/lspconfig/configs/" .. name .. ".lua")
 		end
+		-- Return the filetypes from the configuration, or an empty list if not found
 		return (ok and cfg or {}).filetypes or {}
 	else
+		-- Use the old fallback logic if no configuration is found
 		return old_ft_fallback(name)
 	end
 end)
