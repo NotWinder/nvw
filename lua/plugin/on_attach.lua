@@ -1,4 +1,4 @@
-return function(_, bufnr)
+return function(client, bufnr)
 	-- Debug: print when attached
 	-- print("LSP attached: " .. client.name)
 
@@ -59,7 +59,57 @@ return function(_, bufnr)
 		print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
 	end, "[W]orkspace [L]ist Folders")
 
+	-- Format command using conform for consistency
 	vim.api.nvim_buf_create_user_command(bufnr, "Format", function(_)
-		vim.lsp.buf.format()
-	end, { desc = "Format current buffer with LSP" })
+		local ok, conform = pcall(require, "conform")
+		if ok then
+			conform.format({ bufnr = bufnr, lsp_fallback = true })
+		else
+			vim.lsp.buf.format()
+		end
+	end, { desc = "Format current buffer with conform or LSP" })
+
+	-- Document highlight on cursor hold (if supported)
+	if client.server_capabilities.documentHighlightProvider then
+		local group = vim.api.nvim_create_augroup("lsp_document_highlight", { clear = false })
+		vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+			buffer = bufnr,
+			group = group,
+			callback = vim.lsp.buf.document_highlight,
+		})
+		vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+			buffer = bufnr,
+			group = group,
+			callback = vim.lsp.buf.clear_references,
+		})
+	end
+
+	-- Inlay hints support (Neovim 0.10+)
+	if client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
+		vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+
+		-- Toggle keybind for inlay hints
+		nmap("<leader>ih", function()
+			local enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr })
+			vim.lsp.inlay_hint.enable(not enabled, { bufnr = bufnr })
+		end, "Toggle [I]nlay [H]ints")
+	end
+
+	-- Codelens support (optional, for LSPs like gopls)
+	if client.server_capabilities.codeLensProvider and vim.lsp.codelens then
+		-- Refresh codelens for the current buffer
+		vim.lsp.codelens.refresh()
+		
+		-- Auto-refresh on buffer events
+		local codelens_group = vim.api.nvim_create_augroup("lsp_codelens_" .. bufnr, { clear = true })
+		vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
+			buffer = bufnr,
+			group = codelens_group,
+			callback = function()
+				vim.lsp.codelens.refresh()
+			end,
+		})
+		
+		nmap("<leader>cl", vim.lsp.codelens.run, "Run [C]ode[l]ens")
+	end
 end

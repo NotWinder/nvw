@@ -27,10 +27,15 @@ return {
 				})
 			end, { desc = "[F]ormat [F]ile" })
 
+			-- Format on save with conform (falls back to LSP if no formatter configured)
 			vim.api.nvim_create_autocmd("BufWritePre", {
 				pattern = "*",
 				callback = function(args)
-					conform.format({ bufnr = args.buf })
+					conform.format({
+						bufnr = args.buf,
+						lsp_fallback = true,
+						timeout_ms = 1000,
+					})
 				end,
 			})
 		end,
