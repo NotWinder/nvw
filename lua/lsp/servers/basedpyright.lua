@@ -7,6 +7,9 @@ return {
 	lsp = {
 		filetypes = { "python" },
 		before_init = function(_, config)
+			-- Ensure the settings/python table exists before assigning pythonPath
+			config.settings = config.settings or {}
+			config.settings.python = config.settings.python or {}
 			config.settings.python.pythonPath = util.get_python_path()
 		end,
 		settings = {

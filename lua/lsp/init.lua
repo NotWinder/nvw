@@ -20,7 +20,12 @@ local specs = {
 		on_require = { "lspconfig" },
 		-- LSP handler function - called for each server spec
 		lsp = function(plugin)
-			vim.lsp.config(plugin.name, plugin.lsp or {})
+			local cfg = plugin.lsp or {}
+			-- Ensure per-server config has our default capabilities and on_attach
+			cfg.capabilities = cfg.capabilities or capabilities.make()
+			cfg.on_attach = cfg.on_attach or require("plugin.on_attach")
+
+			vim.lsp.config(plugin.name, cfg)
 			vim.lsp.enable(plugin.name)
 		end,
 		-- Global configuration applied to all LSPs
