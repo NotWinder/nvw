@@ -2,6 +2,7 @@ return {
 	{
 		"gitsigns.nvim",
 		for_cat = "general.always",
+		enabled = nixCats("general.always") or false,
 		event = "DeferredUIEnter",
 		after = function(plugin)
 			require("gitsigns").setup({
@@ -76,6 +77,7 @@ return {
 	{
 		"nvim-surround",
 		for_cat = "general.always",
+		enabled = nixCats("general.always") or false,
 		event = "DeferredUIEnter",
 		after = function(plugin)
 			require("nvim-surround").setup()
@@ -84,6 +86,7 @@ return {
 	{
 		"undotree",
 		for_cat = "general.extra",
+		enabled = nixCats("general.extra") or false,
 		cmd = { "UndotreeToggle", "UndotreeHide", "UndotreeShow", "UndotreeFocus", "UndotreePersistUndo" },
 		keys = { { "<leader>u", "<cmd>UndotreeToggle<CR>", mode = { "n" }, desc = "Undo Tree" } },
 		before = function(_)

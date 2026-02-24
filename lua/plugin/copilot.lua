@@ -1,10 +1,10 @@
 return {
 	{
 		"copilot.lua",
-		for_cat = "completions",  -- corrected typo in category name
+		for_cat = "completions",
+		enabled = nixCats("completions") or false,
 		cmd = "Copilot",
 		event = "InsertEnter",
-		-- Ensure proper dependency handling
 		after = function(_)
 			require("copilot").setup({
 				suggestion = {

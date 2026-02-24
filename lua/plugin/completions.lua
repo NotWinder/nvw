@@ -1,23 +1,29 @@
+local function safe_packadd(name)
+	-- Silently attempt packadd; avoids noisy "not found in 'packpath'" messages
+	-- when a plugin is managed by Nix and placed outside the normal pack path.
+	pcall(vim.cmd, "packadd " .. name)
+end
+
 local load_w_after = function(name)
-	vim.cmd.packadd(name)
-	vim.cmd.packadd(name .. "/after")
+	safe_packadd(name)
+	safe_packadd(name .. "/after")
 end
 
 return {
 	{
 		"cmp-cmdline",
-		for_cat = "complitions",
+		for_cat = "completions",
 		on_plugin = { "blink.cmp" },
 		load = load_w_after,
 	},
 	{
 		"blink.compat",
-		for_cat = "complitions",
+		for_cat = "completions",
 		dep_of = { "cmp-cmdline" },
 	},
 	{
 		"luasnip",
-		for_cat = "complitions",
+		for_cat = "completions",
 		dep_of = { "blink.cmp" },
 		after = function(_)
 			local ls = require("luasnip")
@@ -33,12 +39,13 @@ return {
 	},
 	{
 		"colorful-menu.nvim",
-		for_cat = "complitions",
+		for_cat = "completions",
 		on_plugin = { "blink.cmp" },
 	},
 	{
 		"blink.cmp",
-		for_cat = "complitions",
+		for_cat = "completions",
+		enabled = nixCats("completions") or false,
 		event = "DeferredUIEnter",
 		after = function(_)
 			require("blink.cmp").setup({

@@ -3,7 +3,7 @@ require("plugin.general")
 require("plugin.lsp")
 -- Load necessary plugins using lze
 require("lze").load({
-	{ import = "plugin.completions" },  -- Corrected spelling from "complitions"
+	{ import = "plugin.completions" },
 	{ import = "plugin.copilot" },
 	{ import = "plugin.format" },
 	{ import = "plugin.ai" },

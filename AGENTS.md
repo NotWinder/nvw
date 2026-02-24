@@ -13,17 +13,30 @@ Development shell (recommended):
   nix develop                              # Enter shell with all tools available
 
 Build commands:
-  nix build .#nvim                         # Build default package
+  nix build .#nvim                         # Build default package (wrapRc=true bakes config)
   nix build .#packages.x86_64-linux.nvim   # Build for specific system
-  
+
 Test build:
   ./result/bin/nvim --version              # Verify build
-  ./result/bin/nvim test.lua               # Test with a file
+  ./result/bin/nvim test.lua               # Interactive test
 
 Quick validation:
   nix flake check                          # Validate flake syntax
   stylua --check lua/                      # Check Lua formatting
   alejandra --check flake.nix nix/         # Check Nix formatting
+
+Headless dry-run (use the system nvim, not the built result):
+  nvim --headless -u init.lua -c 'qa!'
+  nvim --headless -u init.lua -V3/tmp/nvim_startup.log -c 'qa!'
+
+IMPORTANT — wrapRc = true:
+  The built package bakes the config into the Nix store at build time.
+  When running `nvim --headless -u init.lua` from the repo root, Lua
+  modules (require("plugin.on_attach") etc.) resolve via runtimepath to
+  the LAST BUILT store path, not the working directory. Always rebuild
+  with `nix build .#nvim` to pick up source changes in the built binary.
+  Use `nvim --headless -u NORC --cmd 'set rtp+=.' ...` for testing local
+  source without a rebuild.
 
 ═══════════════════════════════════════════════════════════════════════════════
 
@@ -37,246 +50,244 @@ Nix files:
   alejandra <file.nix>                     # Format Nix file
   alejandra flake.nix nix/                 # Format all Nix files
 
-Other languages (via conform.nvim):
-  prettier --write <file>                  # JS/TS/JSON
-  ruff format <path>                       # Python
-  gofmt -w <path>                          # Go
-
 In-editor:
-  <leader>ff                               # Format current buffer in Neovim
+  <leader>ff                               # Format current buffer (conform → LSP fallback)
 
 Format-on-save: Enabled via conform.nvim (see lua/plugin/format.lua)
+Formatters by filetype: stylua (lua), alejandra (nix), prettier (js/ts/json),
+                        ruff_format (python), gofmt (go)
 
 ═══════════════════════════════════════════════════════════════════════════════
 
 3. TESTING
 
-Current state: No test suite exists yet
+No automated test suite exists. Manual validation approaches:
 
-Recommended setup (if adding tests):
-  Framework: busted (Lua unit test framework)
-  Location: spec/ directory
-  
-Commands (once busted is added):
-  busted                                   # Run all tests
-  busted spec/path/to/test_spec.lua        # Run single file
-  busted --filter 'pattern' spec/file.lua  # Run specific test by name
+  # Test a module loads without error (local source, no rebuild needed):
+  nvim --headless -u NORC --cmd 'set rtp+=.' \
+    -c "lua require('lsp'); print('ok')" -c 'qa!'
 
-Alternative: luatest (document if you use this instead)
+  # Test LSP attaches to a real file (requires a built result):
+  ./result/bin/nvim --headless test.lua \
+    -c 'lua vim.defer_fn(function() \
+      local c = vim.lsp.get_clients({bufnr=0}); \
+      print(#c, "clients"); vim.cmd("qa!") \
+    end, 5000)'
 
-Manual testing:
-  ./result/bin/nvim --headless +"lua require('lsp')" +quit   # Test module loads
-  ./result/bin/nvim test.lua               # Interactive test
+  # Run checkhealth and capture output:
+  nvim --headless -u init.lua \
+    -c 'redir! > /tmp/health.txt | silent checkhealth | redir END' -c 'qa!'
+
+If a test suite is added: use busted under spec/, run with:
+  busted                                   # All tests
+  busted spec/path/to/test_spec.lua        # Single file
+  busted --filter 'pattern' spec/file.lua  # Single test by name
 
 ═══════════════════════════════════════════════════════════════════════════════
 
 4. REPOSITORY STRUCTURE
 
 lua/
-├── core/                    # Core Neovim settings (remap, set)
+├── core/                    # Core Neovim settings
+│   ├── init.lua             # Loads remap + set
+│   ├── remap.lua            # Key remaps
+│   └── set.lua              # vim.opt settings
 ├── lsp/                     # LSP configuration (modular)
-│   ├── init.lua             # Main orchestrator (loads all modules)
-│   ├── capabilities.lua     # LSP capabilities + blink.cmp integration
-│   ├── diagnostics.lua      # Diagnostic display configuration
-│   ├── util.lua             # Helpers (Python path detection, filetype fallback)
-│   └── servers/             # Individual LSP server configs
-│       ├── init.lua         # Server aggregator
-│       ├── lua_ls.lua       # Lua LSP
-│       ├── basedpyright.lua # Python LSP
-│       ├── gopls.lua        # Go LSP
-│       ├── nixd.lua         # Nix LSP
-│       └── ... (11 servers total)
-├── plugin/                  # Plugin specifications (loaded by lze)
-│   ├── lsp.lua              # LSP loader (minimal, loads lua/lsp/)
-│   ├── on_attach.lua        # LSP keybindings + features
-│   ├── format.lua           # Format-on-save configuration
-│   ├── completions.lua      # blink.cmp setup
-│   ├── copilot.lua          # GitHub Copilot integration
-│   └── general/             # UI plugins, themes, etc.
-└── init.lua                 # Entry point
+│   ├── init.lua             # Orchestrator: loads modules, builds lze specs
+│   ├── capabilities.lua     # Client capabilities + blink.cmp integration
+│   ├── diagnostics.lua      # Diagnostic signs and display config
+│   ├── util.lua             # Python path cache, filetype fallback helper
+│   └── servers/             # One file per LSP server
+│       ├── init.lua         # Aggregator: returns list of all server specs
+│       ├── lua_ls.lua       # Lua   · basedpyright.lua  # Python
+│       ├── gopls.lua        # Go    · nixd.lua           # Nix
+│       ├── rust_analyzer.lua# Rust  · ts_ls.lua          # TypeScript
+│       ├── bashls.lua       # Bash  · yamlls.lua         # YAML
+│       ├── zls.lua          # Zig   · qmlls.lua          # QML
+│       └── (10 servers total)
+├── plugin/                  # Plugin specs loaded by lze
+│   ├── init.lua             # Top-level lze.load() calls
+│   ├── lsp.lua              # Thin shim: require("lsp")
+│   ├── on_attach.lua        # LSP keybindings, inlay hints, codelens
+│   ├── completions.lua      # blink.cmp + luasnip + cmp-cmdline
+│   ├── copilot.lua          # GitHub Copilot suggestions
+│   ├── format.lua           # conform.nvim + format-on-save
+│   ├── ai.lua               # avante.nvim (Copilot AI chat)
+│   └── general/             # UI and editor plugins
+│       ├── init.lua         # Loads oil eagerly, then lze.load() rest
+│       ├── oil.lua          # File explorer (replaces netrw)
+│       ├── always.lua       # gitsigns, nvim-surround, undotree
+│       ├── theme.lua        # tokyonight, lualine, fidget, which-key
+│       ├── telescope.lua    # Fuzzy finder + extensions
+│       ├── treesitter.lua   # Syntax highlighting + textobjects
+│       └── markdown-preview.lua
+├── init.lua                 # Entry point: require("core"), require("plugin")
 
 nix/
-├── categoryDefinitions.nix  # Plugin and tool categories
-└── packageDefinitions.nix   # Package definitions
+├── categoryDefinitions.nix  # All plugin/tool categories and their contents
+└── packageDefinitions.nix   # Package definitions (nvim, nvim-cc) with enabled categories
+
+mdfiles/                     # Reference documentation (not loaded at runtime)
+  LSP_REFACTOR.md, LSP_QUICK_REFERENCE.md, LSP_FIXES.md, LSP_STATUS.md
 
 ═══════════════════════════════════════════════════════════════════════════════
 
-5. LSP-SPECIFIC GUIDELINES (lua/lsp/)
-
-The LSP configuration uses a modular architecture. When working with LSP:
-
-Adding a new LSP server:
-  1. Create lua/lsp/servers/my_server.lua:
-     return {
-         "my_server",
-         enabled = nixCats("lsps.my_lang") or false,
-         lsp = {
-             filetypes = { "mylang" },
-             settings = { ... },
-         },
-     }
-  2. Add to lua/lsp/servers/init.lua:
-     require("lsp.servers.my_server"),
-
-Modifying global LSP behavior:
-  - Capabilities: lua/lsp/capabilities.lua
-  - Diagnostics: lua/lsp/diagnostics.lua
-  - Keybindings: lua/plugin/on_attach.lua
-  - Utilities: lua/lsp/util.lua
-
-Important patterns:
-  - Use pcall for optional dependencies: pcall(require, "blink.cmp")
-  - Check server capabilities before using features: client.server_capabilities.X
-  - Cache expensive operations (see get_python_path in util.lua)
-
-Documentation:
-  - LSP_REFACTOR.md: Full refactor details
-  - LSP_QUICK_REFERENCE.md: Quick reference for common tasks
-  - LSP_FIXES.md: Known issues and troubleshooting
-
-═══════════════════════════════════════════════════════════════════════════════
-
-6. CODING STYLE GUIDELINES (LUA)
-
-General:
-  - Keep modules small and focused: one primary responsibility per file
-  - Prefer `local` for all variables and functions unless exporting a module API
-  - Files in lua/ should return tables or functions only when intended as modules
-
-Formatting:
-  - Use TABS for indentation (existing style)
-  - Line length: aim for 100 columns (soft limit)
-  - Use stylua to format Lua files
-
-Imports / requires:
-  - Use `local mod = require("path.to.module")` for imports
-  - Wrap in pcall if require may fail: `local ok, mod = pcall(require, "optional")`
-  - Check for optional tools: `vim.fn.executable("tool") == 1`
-
-Naming conventions:
-  - snake_case: local functions and variables (get_python_path, venv_paths)
-  - CamelCase/PascalCase: module-level singletons (nixCats)
-  - UPPER_SNAKE_CASE: constants exposed across modules
-
-Module structure:
-  - One module per file under lua/
-  - Return a table of public functions when exposing an API
-  - Keep internal helpers local
-
-Types and annotations:
-  - Use EmmyLua-style annotations for complex functions:
-    ---@param client lsp.Client
-    ---@param bufnr number
-    ---@return boolean
-  - Helps lua_ls and other readers
-
-Error handling:
-  - Use pcall for external requires or runtime calls that may fail
-  - Use assert for programmer invariant checks only
-  - Return nil, err for expected runtime errors in library functions
-  - Use vim.notify or vim.api.nvim_err_writeln for user-facing errors
-
-Logging / diagnostics:
-  - Use vim.notify(msg, vim.log.levels.WARN) for notable issues
-  - Avoid noisy logging in normal code paths
-  - Use debug/trace guards for verbose output
-
-Concurrency / async:
-  - Respect Neovim event loop
-  - Use vim.defer_fn, coroutines, or plugin async APIs
-
-Tests:
-  - Add tests under spec/ or tests/
-  - Make tests deterministic (use nix develop for reproducibility)
-  - Document test runner in this file and README
-
-═══════════════════════════════════════════════════════════════════════════════
-
-7. PLUGIN SYSTEM (lze)
+5. PLUGIN SYSTEM (lze)
 
 This config uses lze (lazy plugin loader) instead of lazy.nvim.
 
-Plugin spec structure:
+Plugin spec — all fields:
   {
       "plugin-name",
-      for_cat = "category",          # Category from nix/categoryDefinitions.nix
-      enabled = nixCats("cat") or false,
-      event = "DeferredUIEnter",     # Trigger event
-      ft = { "lua", "python" },      # Filetypes
-      cmd = { "Command" },           # Commands
-      keys = { "<leader>x" },        # Keybindings
-      on_require = { "module" },     # Load on require
-      dep_of = { "other-plugin" },   # Dependency
-      after = function(plugin)       # Callback after load (NOT a dependency!)
-          require("plugin").setup({})
-      end,
-      lsp = { ... },                 # LSP config (for lsp handler)
+      for_cat = "category",          -- cosmetic only; HAS NO EFFECT in lze
+      enabled = nixCats("cat") or false,  -- REQUIRED for conditional loading
+      event = "DeferredUIEnter",     -- trigger: deferred UI event
+      ft = { "lua" },                -- trigger: filetype
+      cmd = { "Command" },           -- trigger: Ex command
+      keys = { "<leader>x" },        -- trigger: keymap
+      on_require = { "module" },     -- trigger: require() call
+      dep_of = { "other-plugin" },   -- load before another plugin
+      on_plugin = { "other-plugin" },-- load when another plugin loads
+      load = function(name) ... end, -- custom packadd; wrap with pcall
+      before = function(plugin) end, -- runs just before load
+      after = function(plugin) end,  -- runs after load (setup goes here)
+      lsp = { filetypes={}, settings={} }, -- LSP config (lzextras.lsp handler)
   }
 
-CRITICAL: `after` is a callback function, NOT a dependency declaration
-  - ❌ WRONG: after = "blink.cmp"
-  - ✅ RIGHT: after = function(_) require("plugin").setup() end
-  - Use dep_of or on_plugin for dependencies
+Critical rules:
+  - `for_cat` is IGNORED by lze; it documents intent but does nothing.
+    Always set `enabled = nixCats("category") or false` explicitly.
+  - `after` must be a function, never a string:
+      ❌  after = "blink.cmp"
+      ✅  after = function(_) require("blink.cmp").setup() end
+  - Use `dep_of` / `on_plugin` for load-order dependencies, not `after`.
+  - packadd in `load =` must use pcall to avoid "not found in packpath" noise:
+      pcall(vim.cmd, "packadd " .. name)
 
 ═══════════════════════════════════════════════════════════════════════════════
 
-8. GIT / COMMIT GUIDANCE
+6. LSP ARCHITECTURE (lua/lsp/)
 
-- Do NOT create commits unless explicitly requested
-- If asked to commit:
-  - Use short imperative summary (e.g., "Add Rust LSP support")
-  - Include 1-2 sentence body describing why
-  - Follow existing commit style
-- NEVER force-push or amend pushed commits unless user explicitly instructs
+Adding a new server (10 steps reduced to 2):
+  1. Create lua/lsp/servers/my_server.lua:
+       return {
+           "my_server",
+           enabled = nixCats("lsps.my_lang") or false,
+           lsp = {
+               filetypes = { "mylang" },
+               settings = { MyServer = { ... } },
+           },
+       }
+  2. Add require("lsp.servers.my_server") to lua/lsp/servers/init.lua.
+  3. Add the language server binary to lspsAndRuntimeDeps.lsps.my_lang
+     in nix/categoryDefinitions.nix, then enable it in packageDefinitions.nix.
+
+Key files for global LSP behaviour:
+  lua/lsp/capabilities.lua   -- blink.cmp + folding capabilities
+  lua/lsp/diagnostics.lua    -- signs, virtual text, float borders
+  lua/plugin/on_attach.lua   -- keymaps, inlay hints, codelens
+  lua/lsp/util.lua           -- Python venv detection (cached), ft fallback
+
+Neovim 0.12+ LSP APIs used (do not revert to lspconfig-style):
+  vim.lsp.config("server", cfg)   -- configure a server
+  vim.lsp.enable("server")        -- enable a server
+  vim.lsp.codelens.enable(true, { bufnr = bufnr })  -- codelens (refresh() is DEPRECATED)
+  vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
 
 ═══════════════════════════════════════════════════════════════════════════════
 
-9. SAFETY AND REVIEW EXPECTATIONS
+7. CODING STYLE (LUA)
 
-- Generated code is allowed but must be reviewed by a human when touching:
-  - flake.nix or nix/*.nix files
-  - Plugin lists in nix/categoryDefinitions.nix
-  - Core LSP orchestration (lua/lsp/init.lua)
+Formatting:
+  - Indentation: TABS (enforced by stylua; run stylua before committing)
+  - Line length: 100 columns soft limit
+  - Trailing whitespace: none
 
-- When adding dependencies:
-  - Add to devShells first in flake.nix
-  - Test in `nix develop` environment
-  - Verify build with `nix build .#nvim`
+Naming:
+  - snake_case        local variables and functions  (get_python_path)
+  - PascalCase        module-level singletons        (nixCats)
+  - UPPER_SNAKE_CASE  exported constants
+
+Imports:
+  - Top-level: local mod = require("path.to.module")
+  - Optional:  local ok, mod = pcall(require, "optional.dep")
+  - Check binaries: vim.fn.executable("tool") == 1
+
+Module structure:
+  - One responsibility per file
+  - local M = {}  …  return M  pattern for API modules
+  - Internal helpers stay local; never leak into the module table
+
+EmmyLua annotations (for lua_ls):
+  ---@param client lsp.Client
+  ---@param bufnr integer
+  ---@return boolean
+
+Error handling:
+  - pcall for any external require or runtime call that may fail
+  - assert only for programmer-invariant checks
+  - Return nil, err (not error()) for expected library errors
+  - vim.notify(msg, vim.log.levels.WARN) for user-visible warnings
+  - No noisy logging in hot paths (on_attach, autocmds)
+
+nixCats usage:
+  - nixCats("category.sub") returns the category value or nil
+  - Always guard: enabled = nixCats("cat") or false
+  - Use nixCats.pawsible({"allPlugins","opt","plugin-name"}) to get
+    a plugin's Nix store path for dofile() / path construction
 
 ═══════════════════════════════════════════════════════════════════════════════
 
-10. COMMON PATTERNS AND ANTI-PATTERNS
+8. COMMON PATTERNS AND ANTI-PATTERNS
 
 ✅ DO:
-  - Use pcall for optional requires
-  - Check capabilities before using LSP features
-  - Cache expensive operations (filesystem, external calls)
-  - Keep modules focused and single-purpose
-  - Use vim.notify for user-facing messages
-  - Format code with stylua before committing
+  - enabled = nixCats("category") or false  on every lze plugin spec
+  - pcall(vim.cmd, "packadd " .. name)       safe packadd in load =
+  - pcall(require, "optional")               safe optional requires
+  - client.server_capabilities.X            check before using LSP features
+  - vim.lsp.codelens.enable(true, {bufnr=bufnr})  codelens (nightly API)
+  - Cache expensive calls (see get_python_path caching pattern in util.lua)
+  - stylua lua/ before committing
 
 ❌ DON'T:
-  - Use after = "string" in lze plugin specs (it expects a function)
-  - Require modules without checking if they exist
-  - Add noisy logging to normal code paths
-  - Create commits without being asked
-  - Modify flake.nix without testing in nix develop
-  - Use deprecated Neovim APIs (check :help api-changes)
+  - Rely on for_cat alone to gate a plugin — it does nothing in lze
+  - Call vim.lsp.codelens.refresh() — deprecated, removed in 0.13
+  - Use after = "string" — lze expects a function
+  - vim.cmd.packadd(name) bare — use pcall wrapper
+  - Add autocmd-based codelens refresh loops — codelens.enable() handles it
+  - Modify flake.nix / nix/*.nix without testing in nix develop
+  - Commit without being explicitly asked
+
+═══════════════════════════════════════════════════════════════════════════════
+
+9. NIX / CATEGORY SYSTEM
+
+packageDefinitions.nix defines packages (nvim, nvim-cc) with enabled categories:
+  categories = { general = true; lsps = true; completions = true; ... }
+
+categoryDefinitions.nix maps categories to plugins and runtime deps:
+  lspsAndRuntimeDeps.lsps.lua = [ lua-language-server stylua ]
+  optionalPlugins.lsps.lua    = [ lazydev-nvim ]
+  optionalPlugins.completions = [ blink-cmp luasnip ... ]
+
+nixCats resolves nested keys: nixCats("lsps.lua") walks lsps → lua.
+nixCats("lua") returns nil if there is no top-level "lua" key — use the
+full dotted path matching the nix attribute tree.
+
+Review required (human must check before merge):
+  flake.nix, nix/categoryDefinitions.nix, nix/packageDefinitions.nix,
+  lua/lsp/init.lua (LSP orchestrator)
 
 ═══════════════════════════════════════════════════════════════════════════════
 
 APPENDIX: Quick Reference
 
-Language: Lua (Neovim config)
-Plugin manager: lze (lazy plugin loader)
-Tooling: Nix flake, stylua, alejandra, prettier, ruff, gofmt
-LSP servers: lua_ls, basedpyright, gopls, nixd, rust_analyzer, ts_ls, bashls, yamlls, zls, qmlls, qmlls
-Plugins: conform.nvim (formatting), blink.cmp (completion), copilot.lua, nvim-lspconfig, telescope, treesitter
-Cursor rules: none found
-Copilot instructions: none found
-
-Recent changes:
-  - LSP configuration refactored into modular structure (lua/lsp/)
-  - Document highlighting, inlay hints, codelens support added
-  - Python path detection now cached per-directory
-  - Format-on-save unified (conform → LSP fallback)
+  Language       Lua (Neovim config, Neovim 0.12+ nightly)
+  Plugin loader  lze + lzextras (not lazy.nvim)
+  Formatter      stylua (Lua), alejandra (Nix)
+  LSP servers    lua_ls, basedpyright, gopls, nixd, rust_analyzer,
+                 ts_ls, bashls, yamlls, zls, qmlls
+  Key plugins    conform.nvim, blink.cmp, copilot.lua, avante.nvim,
+                 nvim-lspconfig, telescope.nvim, nvim-treesitter, oil.nvim
+  Cursor rules   none
+  Copilot rules  none

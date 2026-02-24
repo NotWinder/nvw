@@ -7,6 +7,7 @@ return {
 	{
 		"lualine.nvim",
 		for_cat = "general.always",
+		enabled = nixCats("general.always") or false,
 		-- cmd = { "" },
 		event = "DeferredUIEnter",
 		-- ft = "",
@@ -59,6 +60,7 @@ return {
 	{
 		"fidget.nvim",
 		for_cat = "general.extra",
+		enabled = nixCats("general.extra") or false,
 		event = "DeferredUIEnter",
 		after = function(plugin)
 			require("fidget").setup({})
@@ -67,6 +69,7 @@ return {
 	{
 		"which-key.nvim",
 		for_cat = "general.extra",
+		enabled = nixCats("general.extra") or false,
 		-- cmd = { "" },
 		event = "DeferredUIEnter",
 		-- ft = "",

@@ -4,14 +4,17 @@ return {
 	{
 		"nvim-treesitter",
 		for_cat = "general.treesitter",
+		enabled = nixCats("general.treesitter") or false,
 		-- cmd = { "" },
 		event = "DeferredUIEnter",
 		-- ft = "",
 		-- keys = "",
 		-- colorscheme = "",
 		load = function(name)
-			vim.cmd.packadd(name)
-			vim.cmd.packadd("nvim-treesitter-textobjects")
+			-- Use pcall to avoid noisy "not found in 'packpath'" messages when
+			-- plugins are Nix-managed and placed outside the conventional pack path.
+			pcall(vim.cmd, "packadd " .. name)
+			pcall(vim.cmd, "packadd nvim-treesitter-textobjects")
 		end,
 		after = function(plugin)
 			-- [[ Configure Treesitter ]]

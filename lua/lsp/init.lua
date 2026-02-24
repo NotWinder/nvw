@@ -17,6 +17,7 @@ local specs = {
 	{
 		"nvim-lspconfig",
 		for_cat = "general.core",
+		enabled = nixCats("lsps.core") or false,
 		on_require = { "lspconfig" },
 		-- LSP handler function - called for each server spec
 		lsp = function(plugin)
@@ -39,7 +40,7 @@ local specs = {
 	-- lazydev.nvim for enhanced Lua development
 	{
 		"lazydev.nvim",
-		for_cat = "lua",
+		enabled = nixCats("lsps.lua") or false,
 		cmd = { "LazyDev" },
 		ft = "lua",
 		after = function(_)

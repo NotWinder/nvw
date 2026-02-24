@@ -58,6 +58,7 @@ return {
 	{
 		"telescope.nvim",
 		for_cat = "general.telescope",
+		enabled = nixCats("general.telescope") or false,
 		cmd = { "Telescope", "LiveGrepGitRoot" },
 		-- NOTE: our on attach function defines keybinds that call telescope.
 		-- so, the on_require handler will load telescope when we use those.
@@ -174,9 +175,11 @@ return {
 		},
 		-- colorscheme = "",
 		load = function(name)
-			vim.cmd.packadd(name)
-			vim.cmd.packadd("telescope-fzf-native.nvim")
-			vim.cmd.packadd("telescope-ui-select.nvim")
+			-- Use pcall to avoid noisy "not found in 'packpath'" messages when
+			-- plugins are Nix-managed and placed outside the conventional pack path.
+			pcall(vim.cmd, "packadd " .. name)
+			pcall(vim.cmd, "packadd telescope-fzf-native.nvim")
+			pcall(vim.cmd, "packadd telescope-ui-select.nvim")
 		end,
 		after = function(plugin)
 			require("telescope").setup({

@@ -2,6 +2,7 @@ return {
 	{
 		"conform.nvim",
 		for_cat = "format",
+		enabled = nixCats("format") or false,
 		keys = {
 			{ "<leader>ff", desc = "[F]ormat [F]ile" },
 		},

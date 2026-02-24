@@ -100,19 +100,8 @@ return function(client, bufnr)
 
 	-- Codelens support (optional, for LSPs like gopls)
 	if client.server_capabilities.codeLensProvider and vim.lsp.codelens then
-		-- Refresh codelens for the current buffer
-		vim.lsp.codelens.refresh()
-		
-		-- Auto-refresh on buffer events
-		local codelens_group = vim.api.nvim_create_augroup("lsp_codelens_" .. bufnr, { clear = true })
-		vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
-			buffer = bufnr,
-			group = codelens_group,
-			callback = function()
-				vim.lsp.codelens.refresh()
-			end,
-		})
-		
+		-- enable() replaces the deprecated refresh() and manages its own refresh cycle
+		vim.lsp.codelens.enable(true, { bufnr = bufnr })
 		nmap("<leader>cl", vim.lsp.codelens.run, "Run [C]ode[l]ens")
 	end
 end

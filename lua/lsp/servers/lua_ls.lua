@@ -9,8 +9,9 @@ return {
 				runtime = {
 					version = "LuaJIT",
 				},
-				formatters = {
-					ignoreComments = true,
+				format = {
+					-- stylua handles formatting via conform; disable lua_ls formatter
+					enable = false,
 				},
 				signatureHelp = {
 					enabled = true,
