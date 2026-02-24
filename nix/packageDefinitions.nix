@@ -5,7 +5,7 @@
       suffix-LD = true;
       wrapRc = true;
       aliases = ["vi" "vim"];
-      neovim-unwrapped = inputs.neovim-nightly-overlay.packages.${pkgs.system}.neovim;
+      neovim-unwrapped = inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.neovim;
     };
     categories = {
       general = true;
@@ -23,7 +23,7 @@
     settings = {
       wrapRc = true;
       aliases = ["cc"];
-      neovim-unwrapped = inputs.neovim-nightly-overlay.packages.${pkgs.system}.neovim;
+      neovim-unwrapped = inputs.neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.neovim;
     };
     categories = {
       general = true;
