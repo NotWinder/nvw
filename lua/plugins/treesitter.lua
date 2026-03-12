@@ -1,25 +1,34 @@
--- [[ Configure Treesitter ]]
--- See `:help nvim-treesitter`
 return {
 	{
-		"nvim-treesitter",
-		for_cat = "general.treesitter",
-		enabled = nixCats("general.treesitter") or false,
-		-- cmd = { "" },
-		event = "DeferredUIEnter",
-		-- ft = "",
-		-- keys = "",
-		-- colorscheme = "",
-		load = function(name)
-			-- Use pcall to avoid noisy "not found in 'packpath'" messages when
-			-- plugins are Nix-managed and placed outside the conventional pack path.
-			pcall(vim.cmd, "packadd " .. name)
-			pcall(vim.cmd, "packadd nvim-treesitter-textobjects")
-		end,
-		after = function(plugin)
-			-- [[ Configure Treesitter ]]
-			-- See `:help nvim-treesitter`
-			require("nvim-treesitter").setup({
+		"nvim-treesitter/nvim-treesitter",
+		build = ":TSUpdate",
+		event = "VeryLazy",
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter-textobjects",
+		},
+		config = function()
+			require("nvim-treesitter.configs").setup({
+				ensure_installed = {
+					"bash",
+					"c",
+					"css",
+					"go",
+					"html",
+					"javascript",
+					"json",
+					"lua",
+					"markdown",
+					"markdown_inline",
+					"nix",
+					"python",
+					"rust",
+					"typescript",
+					"vim",
+					"vimdoc",
+					"yaml",
+					"zig",
+				},
+				auto_install = true,
 				highlight = { enable = true },
 				indent = { enable = false },
 				incremental_selection = {
@@ -34,9 +43,8 @@ return {
 				textobjects = {
 					select = {
 						enable = true,
-						lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
+						lookahead = true,
 						keymaps = {
-							-- You can use the capture groups defined in textobjects.scm
 							["aa"] = "@parameter.outer",
 							["ia"] = "@parameter.inner",
 							["af"] = "@function.outer",
@@ -47,7 +55,7 @@ return {
 					},
 					move = {
 						enable = true,
-						set_jumps = true, -- whether to set jumps in the jumplist
+						set_jumps = true,
 						goto_next_start = {
 							["]m"] = "@function.outer",
 							["]]"] = "@class.outer",

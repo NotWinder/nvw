@@ -1,31 +1,12 @@
-local function safe_packadd(name)
-	-- Silently attempt packadd; avoids noisy "not found in 'packpath'" messages
-	-- when a plugin is managed by Nix and placed outside the normal pack path.
-	pcall(vim.cmd, "packadd " .. name)
-end
-
-local load_w_after = function(name)
-	safe_packadd(name)
-	safe_packadd(name .. "/after")
-end
-
 return {
 	{
-		"cmp-cmdline",
-		for_cat = "completions",
-		on_plugin = { "blink.cmp" },
-		load = load_w_after,
-	},
-	{
-		"blink.compat",
-		for_cat = "completions",
-		dep_of = { "cmp-cmdline" },
-	},
-	{
-		"luasnip",
-		for_cat = "completions",
-		dep_of = { "blink.cmp" },
-		after = function(_)
+		"L3MON4D3/LuaSnip",
+		build = "make install_jsregexp",
+		lazy = true,
+		dependencies = {
+			"rafamadriz/friendly-snippets",
+		},
+		config = function()
 			local ls = require("luasnip")
 			require("luasnip.loaders.from_vscode").lazy_load()
 			ls.config.setup({})
@@ -38,16 +19,15 @@ return {
 		end,
 	},
 	{
-		"colorful-menu.nvim",
-		for_cat = "completions",
-		on_plugin = { "blink.cmp" },
-	},
-	{
-		"blink.cmp",
-		for_cat = "completions",
-		enabled = nixCats("completions") or false,
-		event = "DeferredUIEnter",
-		after = function(_)
+		"saghen/blink.cmp",
+		event = "VeryLazy",
+		dependencies = {
+			"L3MON4D3/LuaSnip",
+			"saghen/blink.compat",
+			"hrsh7th/cmp-cmdline",
+			"xzbdmw/colorful-menu.nvim",
+		},
+		config = function()
 			require("blink.cmp").setup({
 				keymap = {
 					["<Up>"] = { "select_prev", "fallback" },

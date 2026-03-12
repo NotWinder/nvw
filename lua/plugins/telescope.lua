@@ -1,42 +1,20 @@
 -- Telescope is a fuzzy finder that comes with a lot of different things that
 -- it can fuzzy find! It's more than just a "file finder", it can search
 -- many different aspects of Neovim, your workspace, LSP, and more!
---
--- The easiest way to use telescope, is to start by doing something like:
---  :Telescope help_tags
---
--- After running this command, a window will open up and you're able to
--- type in the prompt window. You'll see a list of help_tags options and
--- a corresponding preview of the help.
---
--- Two important keymaps to use while in telescope are:
---  - Insert mode: <c-/>
---  - Normal mode: ?
---
--- This opens a window that shows you all of the keymaps for the current
--- telescope picker. This is really useful to discover what Telescope can
--- do as well as how to actually do it!
 
--- [[ Configure Telescope ]]
--- See `:help telescope` and `:help telescope.setup()`
-
--- Telescope live_grep in git root
 -- Function to find the git root directory based on the current buffer's path
 local function find_git_root()
-	-- Use the current buffer's path as the starting point for the git search
 	local current_file = vim.api.nvim_buf_get_name(0)
 	local current_dir
 	local cwd = vim.fn.getcwd()
-	-- If the buffer is not associated with a file, return nil
 	if current_file == "" then
 		current_dir = cwd
 	else
-		-- Extract the directory from the current file's path
 		current_dir = vim.fn.fnamemodify(current_file, ":h")
 	end
 
-	-- Find the Git root directory from the current file's path
-	local git_root = vim.fn.systemlist("git -C " .. vim.fn.escape(current_dir, " ") .. " rev-parse --show-toplevel")[1]
+	local git_root =
+		vim.fn.systemlist("git -C " .. vim.fn.escape(current_dir, " ") .. " rev-parse --show-toplevel")[1]
 	if vim.v.shell_error ~= 0 then
 		print("Not a git repository. Searching on current working directory")
 		return cwd
@@ -56,29 +34,26 @@ end
 
 return {
 	{
-		"telescope.nvim",
-		for_cat = "general.telescope",
-		enabled = nixCats("general.telescope") or false,
+		"nvim-telescope/telescope.nvim",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+			"nvim-telescope/telescope-ui-select.nvim",
+		},
 		cmd = { "Telescope", "LiveGrepGitRoot" },
-		-- NOTE: our on attach function defines keybinds that call telescope.
-		-- so, the on_require handler will load telescope when we use those.
-		on_require = { "telescope" },
-		-- event = "",
-		-- ft = "",
 		keys = {
-			{ "<leader>pM", "<cmd>Telescope notify<CR>", mode = { "n" }, desc = "[S]earch [M]essage" },
-			{ "<leader>pp", live_grep_git_root, mode = { "n" }, desc = "[S]earch git [P]roject root" },
+			{ "<leader>pM", "<cmd>Telescope notify<CR>", desc = "[S]earch [M]essage" },
+			{ "<leader>pp", live_grep_git_root, desc = "[S]earch git [P]roject root" },
 			{
 				"<leader>/",
 				function()
-					-- Slightly advanced example of overriding default behavior and theme
-					-- You can pass additional configuration to telescope to change theme, layout, etc.
-					require("telescope.builtin").current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
-						winblend = 10,
-						previewer = false,
-					}))
+					require("telescope.builtin").current_buffer_fuzzy_find(
+						require("telescope.themes").get_dropdown({
+							winblend = 10,
+							previewer = false,
+						})
+					)
 				end,
-				mode = { "n" },
 				desc = "[/] Fuzzily search in current buffer",
 			},
 			{
@@ -89,7 +64,6 @@ return {
 						prompt_title = "Live Grep in Open Files",
 					})
 				end,
-				mode = { "n" },
 				desc = "[S]earch [/] in Open Files",
 			},
 			{
@@ -97,7 +71,6 @@ return {
 				function()
 					return require("telescope.builtin").buffers()
 				end,
-				mode = { "n" },
 				desc = "[ ] Find existing buffers",
 			},
 			{
@@ -105,7 +78,6 @@ return {
 				function()
 					return require("telescope.builtin").oldfiles()
 				end,
-				mode = { "n" },
 				desc = '[S]earch Recent Files ("." for repeat)',
 			},
 			{
@@ -113,7 +85,6 @@ return {
 				function()
 					return require("telescope.builtin").resume()
 				end,
-				mode = { "n" },
 				desc = "[S]earch [R]esume",
 			},
 			{
@@ -121,7 +92,6 @@ return {
 				function()
 					return require("telescope.builtin").diagnostics()
 				end,
-				mode = { "n" },
 				desc = "[S]earch [D]iagnostics",
 			},
 			{
@@ -129,7 +99,6 @@ return {
 				function()
 					return require("telescope.builtin").live_grep()
 				end,
-				mode = { "n" },
 				desc = "[S]earch by [G]rep",
 			},
 			{
@@ -137,7 +106,6 @@ return {
 				function()
 					return require("telescope.builtin").grep_string()
 				end,
-				mode = { "n" },
 				desc = "[S]earch current [W]ord",
 			},
 			{
@@ -145,7 +113,6 @@ return {
 				function()
 					return require("telescope.builtin").builtin()
 				end,
-				mode = { "n" },
 				desc = "[S]earch [S]elect Telescope",
 			},
 			{
@@ -153,7 +120,6 @@ return {
 				function()
 					return require("telescope.builtin").find_files()
 				end,
-				mode = { "n" },
 				desc = "[S]earch [F]iles",
 			},
 			{
@@ -161,7 +127,6 @@ return {
 				function()
 					return require("telescope.builtin").keymaps()
 				end,
-				mode = { "n" },
 				desc = "[S]earch [K]eymaps",
 			},
 			{
@@ -169,29 +134,16 @@ return {
 				function()
 					return require("telescope.builtin").help_tags()
 				end,
-				mode = { "n" },
 				desc = "[S]earch [H]elp",
 			},
 		},
-		-- colorscheme = "",
-		load = function(name)
-			-- Use pcall to avoid noisy "not found in 'packpath'" messages when
-			-- plugins are Nix-managed and placed outside the conventional pack path.
-			pcall(vim.cmd, "packadd " .. name)
-			pcall(vim.cmd, "packadd telescope-fzf-native.nvim")
-			pcall(vim.cmd, "packadd telescope-ui-select.nvim")
-		end,
-		after = function(plugin)
+		config = function()
 			require("telescope").setup({
-				-- You can put your default mappings / updates / etc. in here
-				--  All the info you're looking for is in `:help telescope.setup()`
-				--
 				defaults = {
 					mappings = {
 						i = { ["<c-enter>"] = "to_fuzzy_refine" },
 					},
 				},
-				-- pickers = {}
 				extensions = {
 					["ui-select"] = {
 						require("telescope.themes").get_dropdown(),

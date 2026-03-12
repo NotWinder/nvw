@@ -1,5 +1,5 @@
 -- LSP Utility functions
--- Provides helpers for Python path detection and filetype fallback
+-- Provides helpers for Python path detection
 local M = {}
 
 -- Cache for Python paths per working directory
@@ -40,32 +40,6 @@ function M.get_python_path()
 	-- Fallback to system python
 	python_path_cache[cwd] = "python3"
 	return "python3"
-end
-
---- Set up filetype fallback for LSP configurations
---- Uses nixCats paths for faster LSP config discovery
-function M.setup_filetype_fallback()
-	local old_ft_fallback = require("lze").h.lsp.get_ft_fallback()
-
-	require("lze").h.lsp.set_ft_fallback(function(name)
-		-- Attempt to locate the LSP configuration in the Nix store
-		local lspcfg = nixCats.pawsible({ "allPlugins", "opt", "nvim-lspconfig" })
-			or nixCats.pawsible({ "allPlugins", "start", "nvim-lspconfig" })
-
-		if lspcfg then
-			-- Try to load the LSP configuration file for the given name
-			local ok, cfg = pcall(dofile, lspcfg .. "/lsp/" .. name .. ".lua")
-			if not ok then
-				-- Fallback to an alternative path if the first attempt fails
-				ok, cfg = pcall(dofile, lspcfg .. "/lua/lspconfig/configs/" .. name .. ".lua")
-			end
-			-- Return the filetypes from the configuration, or an empty list if not found
-			return (ok and cfg or {}).filetypes or {}
-		else
-			-- Use the old fallback logic if no configuration is found
-			return old_ft_fallback(name)
-		end
-	end)
 end
 
 return M

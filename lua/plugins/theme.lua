@@ -1,25 +1,30 @@
-require("tokyonight").setup({
-	style = "storm",
-	transparent = true,
-})
-require("tokyonight").load()
 return {
 	{
-		"lualine.nvim",
-		for_cat = "general.always",
-		enabled = nixCats("general.always") or false,
-		-- cmd = { "" },
-		event = "DeferredUIEnter",
-		-- ft = "",
-		-- keys = "",
-		-- colorscheme = "",
-		after = function(plugin)
+		"folke/tokyonight.nvim",
+		lazy = false,
+		priority = 1000,
+		config = function()
+			require("tokyonight").setup({
+				style = "storm",
+				transparent = true,
+			})
+			require("tokyonight").load()
+		end,
+	},
+	{
+		"nvim-lualine/lualine.nvim",
+		event = "VeryLazy",
+		dependencies = {
+			"nvim-tree/nvim-web-devicons",
+			"arkav/lualine-lsp-progress",
+		},
+		config = function()
 			require("lualine").setup({
 				options = {
 					icons_enabled = true,
 					theme = "auto",
-					component_separators = { left = "", right = "" },
-					section_separators = { left = "", right = "" },
+					component_separators = { left = "", right = "" },
+					section_separators = { left = "", right = "" },
 					disabled_filetypes = {
 						statusline = {},
 						winbar = {},
@@ -58,24 +63,14 @@ return {
 		end,
 	},
 	{
-		"fidget.nvim",
-		for_cat = "general.extra",
-		enabled = nixCats("general.extra") or false,
-		event = "DeferredUIEnter",
-		after = function(plugin)
-			require("fidget").setup({})
-		end,
+		"j-hui/fidget.nvim",
+		event = "VeryLazy",
+		opts = {},
 	},
 	{
-		"which-key.nvim",
-		for_cat = "general.extra",
-		enabled = nixCats("general.extra") or false,
-		-- cmd = { "" },
-		event = "DeferredUIEnter",
-		-- ft = "",
-		-- keys = "",
-		-- colorscheme = "",
-		after = function(plugin)
+		"folke/which-key.nvim",
+		event = "VeryLazy",
+		config = function()
 			require("which-key").setup({})
 			require("which-key").add({
 				{ "<leader><leader>", group = "buffer commands" },

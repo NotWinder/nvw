@@ -1,10 +1,8 @@
 return {
 	{
-		"gitsigns.nvim",
-		for_cat = "general.always",
-		enabled = nixCats("general.always") or false,
-		event = "DeferredUIEnter",
-		after = function(plugin)
+		"lewis6991/gitsigns.nvim",
+		event = "VeryLazy",
+		config = function()
 			require("gitsigns").setup({
 				signs = {
 					add = { text = "+" },
@@ -63,35 +61,25 @@ return {
 						gs.diffthis("~")
 					end, { desc = "git diff against last commit" })
 
-					map("n", "<leader>gtb", gs.toggle_current_line_blame, { desc = "toggle git blame line" })
+					map(
+						"n",
+						"<leader>gtb",
+						gs.toggle_current_line_blame,
+						{ desc = "toggle git blame line" }
+					)
 					map("n", "<leader>gtd", gs.toggle_deleted, { desc = "toggle git show deleted" })
 
-					map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", { desc = "select git hunk" })
+					map(
+						{ "o", "x" },
+						"ih",
+						":<C-U>Gitsigns select_hunk<CR>",
+						{ desc = "select git hunk" }
+					)
 				end,
 			})
 			vim.cmd([[hi GitSignsAdd guifg=#04de21]])
 			vim.cmd([[hi GitSignsChange guifg=#83fce6]])
 			vim.cmd([[hi GitSignsDelete guifg=#fa2525]])
-		end,
-	},
-	{
-		"nvim-surround",
-		for_cat = "general.always",
-		enabled = nixCats("general.always") or false,
-		event = "DeferredUIEnter",
-		after = function(plugin)
-			require("nvim-surround").setup()
-		end,
-	},
-	{
-		"undotree",
-		for_cat = "general.extra",
-		enabled = nixCats("general.extra") or false,
-		cmd = { "UndotreeToggle", "UndotreeHide", "UndotreeShow", "UndotreeFocus", "UndotreePersistUndo" },
-		keys = { { "<leader>u", "<cmd>UndotreeToggle<CR>", mode = { "n" }, desc = "Undo Tree" } },
-		before = function(_)
-			vim.g.undotree_WindowLayout = 1
-			vim.g.undotree_SplitWidth = 40
 		end,
 	},
 }
