@@ -3,10 +3,10 @@
 local M = {}
 
 function M.setup()
-	-- Configure diagnostic display
+	-- Configure diagnostic display (signs.text is the Neovim 0.10+ API;
+	-- vim.fn.sign_define for diagnostic signs is deprecated)
 	vim.diagnostic.config({
 		virtual_text = true,
-		signs = true,
 		underline = true,
 		update_in_insert = false,
 		severity_sort = true,
@@ -15,20 +15,15 @@ function M.setup()
 			header = "",
 			prefix = "",
 		},
+		signs = {
+			text = {
+				[vim.diagnostic.severity.ERROR] = "󰅚 ",
+				[vim.diagnostic.severity.WARN] = "󰀪 ",
+				[vim.diagnostic.severity.HINT] = "󰌶 ",
+				[vim.diagnostic.severity.INFO] = " ",
+			},
+		},
 	})
-
-	-- Define diagnostic signs with icons
-	local signs = {
-		Error = "󰅚 ",
-		Warn = "󰀪 ",
-		Hint = "󰌶 ",
-		Info = " ",
-	}
-
-	for type, icon in pairs(signs) do
-		local hl = "DiagnosticSign" .. type
-		vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-	end
 end
 
 return M

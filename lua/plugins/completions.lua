@@ -20,6 +20,7 @@ return {
 	},
 	{
 		"saghen/blink.cmp",
+		version = "1.*", -- pins to stable release with pre-built fuzzy binaries
 		event = "VeryLazy",
 		dependencies = {
 			"L3MON4D3/LuaSnip",

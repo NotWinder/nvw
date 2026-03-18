@@ -93,10 +93,21 @@ return function(client, bufnr)
 		end, "Toggle [I]nlay [H]ints")
 	end
 
-	-- Codelens support (optional, for LSPs like gopls)
-	if client.server_capabilities.codeLensProvider and vim.lsp.codelens then
-		-- enable() replaces the deprecated refresh() and manages its own refresh cycle
-		vim.lsp.codelens.enable(true, { bufnr = bufnr })
-		nmap("<leader>cl", vim.lsp.codelens.run, "Run [C]ode[l]ens")
-	end
+    -- Codelens support (optional, for LSPs like gopls)
+    if client.server_capabilities.codeLensProvider and vim.lsp.codelens then
+        local codelens = vim.lsp.codelens
+
+        -- Prefer the modern `enable` API when available, but fall back safely
+        -- to older APIs if the runtime doesn't provide it to avoid hard errors.
+        if type(codelens.enable) == "function" then
+            pcall(codelens.enable, true, { bufnr = bufnr })
+        elseif type(codelens.refresh) == "function" then
+            -- Deprecated in newer Neovim, use only as a safe fallback.
+            pcall(codelens.refresh)
+        end
+
+        if type(codelens.run) == "function" then
+            nmap("<leader>cl", codelens.run, "Run [C]ode[l]ens")
+        end
+    end
 end
